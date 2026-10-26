@@ -1,0 +1,24 @@
+{
+  "name": "esports-players-rosters-api",
+  "version": "1.0.0",
+  "description": "REST API para gestionar jugadores y rosters de eSports",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0",
+    "sequelize": "^6.37.5",
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.7.0",
+    "cookie-parser": "^1.4.7",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

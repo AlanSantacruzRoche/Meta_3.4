@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>eSports | Panel Admin</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/"><span class="logo">E</span><span>ARENA <small>MANAGEMENT</small></span></a>
+      <div id="topUser" class="top-user hidden"><span class="online-dot"></span><span id="userEmail"></span><button id="logoutBtn" class="btn btn-ghost">Cerrar sesión</button></div>
+    </header>
+
+    <main>
+      <section id="loginView" class="login-layout">
+        <div class="hero">
+          <p class="eyebrow">CONTROL CENTER / 01</p>
+          <h1>Tu equipo.<br><span>Tu estrategia.</span></h1>
+          <p class="muted">Administra jugadores, construye rosters y prepara tu siguiente temporada desde un solo lugar.</p>
+          <div class="hero-stats"><div><strong>ROSTERS</strong><small>Gestión de plantillas</small></div><div><strong>PLAYERS</strong><small>Perfiles centralizados</small></div></div>
+        </div>
+        <form id="loginForm" class="panel login-card">
+          <p class="eyebrow">ACCESO SEGURO</p><h2>Bienvenido de nuevo</h2><p class="muted">Inicia sesión con tu cuenta de administrador.</p>
+          <label>Correo electrónico<input name="email" type="email" autocomplete="username" placeholder="admin@esports.local" required></label>
+          <label>Contraseña<input name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required></label>
+          <button class="btn btn-primary full" type="submit">Entrar al panel <span>↗</span></button>
+          <p id="loginMessage" class="message" role="status"></p>
+          <p class="security-note"><span>▣</span> Sesión protegida con JWT, cookies HTTP-Only y CSRF.</p>
+        </form>
+      </section>
+
+      <section id="adminView" class="hidden">
+        <div class="page-heading"><div><p class="eyebrow">ADMINISTRATION / DASHBOARD</p><h1>Panel de control</h1><p class="muted">Gestiona la plantilla y las alineaciones de tu organización.</p></div><span class="role-pill">● ADMIN</span></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span>JUGADORES</span><strong id="playersCount">—</strong><small>Perfiles registrados</small></article>
+          <article class="stat-card"><span>ROSTERS</span><strong id="rostersCount">—</strong><small>Plantillas creadas</small></article>
+          <article class="stat-card"><span>JUGADORES ACTIVOS</span><strong id="activeCount">—</strong><small>Disponibles en el sistema</small></article>
+        </div>
+        <nav class="tabs"><button class="tab active" data-tab="players">♙ Jugadores</button><button class="tab" data-tab="rosters">▤ Rosters</button></nav>
+        <section id="playersSection" class="panel section-panel">
+          <div class="section-title"><div><p class="eyebrow">PLAYER DATABASE</p><h2>Jugadores</h2></div><button id="newPlayerBtn" class="btn btn-primary">＋ Nuevo jugador</button></div>
+          <div class="filters"><input id="playerSearch" placeholder="Buscar nickname..." aria-label="Buscar nickname"><select id="playerRole"><option value="">Todos los roles</option><option>Top</option><option>Jungle</option><option>Mid</option><option>ADC</option><option>Support</option></select><select id="playerState"><option value="">Todos los estados</option><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>JUGADOR</th><th>ROL</th><th>PAÍS</th><th>ESTADO</th><th>ACCIONES</th></tr></thead><tbody id="playersTable"></tbody></table></div>
+          <p id="playersEmpty" class="empty hidden">No hay jugadores que coincidan con la búsqueda.</p>
+        </section>
+        <section id="rostersSection" class="panel section-panel hidden">
+          <div class="section-title"><div><p class="eyebrow">TEAM COMPOSITION</p><h2>Rosters</h2></div><button id="newRosterBtn" class="btn btn-primary">＋ Nuevo roster</button></div>
+          <div class="filters"><select id="rosterType"><option value="">Todos los tipos</option><option>Principal</option><option>Academy</option></select><input id="rosterSeason" placeholder="Temporada (ej. 2026)"></div>
+          <div id="rostersGrid" class="rosters-grid"></div>
+          <p id="rostersEmpty" class="empty hidden">Todavía no hay rosters registrados.</p>
+        </section>
+        <p id="globalMessage" class="message" role="status"></p>
+      </section>
+    </main>
+    <footer><span>ARENA MANAGEMENT</span><span>ESPORTS ROSTER SYSTEM · SECURE ADMIN</span></footer>
+  </div>
+
+  <dialog id="playerDialog" class="modal">
+    <form id="playerForm" method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">PLAYER PROFILE</p><h2 id="playerDialogTitle">Nuevo jugador</h2></div><button type="button" class="icon-btn" data-close="playerDialog">×</button></div>
+      <input name="id" type="hidden">
+      <label>Nickname *<input name="nickname" maxlength="50" required></label>
+      <label>Nombre real<input name="nombre_real" maxlength="120"></label>
+      <div class="form-row"><label>Rol *<select name="rol" required><option value="">Seleccionar</option><option>Top</option><option>Jungle</option><option>Mid</option><option>ADC</option><option>Support</option></select></label><label>Estado<select name="estado"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></label></div>
+      <label>País<input name="pais" maxlength="80"></label>
+      <p class="message" id="playerFormMessage"></p><div class="modal-actions"><button type="button" class="btn btn-ghost" data-close="playerDialog">Cancelar</button><button type="submit" class="btn btn-primary">Guardar jugador</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="rosterDialog" class="modal">
+    <form id="rosterForm" method="dialog">
+      <div class="modal-head"><div><p class="eyebrow">ROSTER SETUP</p><h2 id="rosterDialogTitle">Nuevo roster</h2></div><button type="button" class="icon-btn" data-close="rosterDialog">×</button></div>
+      <input name="id" type="hidden">
+      <label>Nombre del roster *<input name="nombre" maxlength="100" required></label>
+      <label>Juego<input name="juego" value="League of Legends" maxlength="100"></label>
+      <div class="form-row"><label>Tipo<select name="tipo"><option>Principal</option><option>Academy</option></select></label><label>Temporada *<input name="temporada" value="2026" required></label></div>
+      <p class="message" id="rosterFormMessage"></p><div class="modal-actions"><button type="button" class="btn btn-ghost" data-close="rosterDialog">Cancelar</button><button type="submit" class="btn btn-primary">Guardar roster</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="rosterDetailDialog" class="modal wide-modal">
+    <div class="modal-head"><div><p class="eyebrow">ROSTER LINEUP</p><h2 id="detailTitle">Integrantes del roster</h2></div><button type="button" class="icon-btn" data-close="rosterDetailDialog">×</button></div>
+    <div id="rosterDetailBody"></div>
+    <form id="assignForm" class="assign-form"><label>Jugador<select name="id_jugador" id="assignPlayer" required></select></label><label>Posición<select name="rol_en_roster"><option>Titular</option><option>Suplente</option></select></label><button class="btn btn-primary" type="submit">Asignar</button></form>
+    <p id="assignMessage" class="message"></p>
+  </dialog>
+  <script src="/app.js" defer></script>
+</body>
+</html>

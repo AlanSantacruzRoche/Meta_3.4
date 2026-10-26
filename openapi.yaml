@@ -1,0 +1,227 @@
+openapi: 3.0.3
+info:
+  title: eSports Players and Rosters API
+  version: 1.0.0
+  description: API REST para gestionar jugadores y rosters de eSports. Las operaciones de escritura requieren sesión Admin mediante cookie JWT HTTP-Only y encabezado X-CSRF-Token.
+servers:
+  - url: http://localhost:3000/api/v1
+components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: jwt_token
+  schemas:
+    Jugador:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        nickname: { type: string, example: Faker }
+        nombre_real: { type: string, nullable: true, example: Lee Sang-hyeok }
+        pais: { type: string, nullable: true, example: Corea del Sur }
+        rol: { type: string, enum: [Top, Jungle, Mid, ADC, Support] }
+        estado: { type: string, enum: [activo, inactivo] }
+    Roster:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        nombre: { type: string, example: TL Principal }
+        juego: { type: string, example: League of Legends }
+        tipo: { type: string, enum: [Principal, Academy] }
+        temporada: { type: string, example: '2026' }
+paths:
+  /health:
+    get:
+      summary: Verificar estado de API y base de datos
+      responses:
+        '200': { description: API y base de datos disponibles }
+        '503': { description: Base de datos no disponible }
+  /roles:
+    get:
+      summary: Listar roles de jugador válidos
+      responses:
+        '200': { description: Lista de roles }
+  /estados:
+    get:
+      summary: Listar estados válidos
+      responses:
+        '200': { description: Lista de estados }
+  /tipos-roster:
+    get:
+      summary: Listar tipos de roster válidos
+      responses:
+        '200': { description: Lista de tipos }
+  /jugadores:
+    get:
+      summary: Listar y filtrar jugadores
+      parameters:
+        - in: query
+          name: rol
+          schema: { type: string, enum: [Top, Jungle, Mid, ADC, Support] }
+        - in: query
+          name: estado
+          schema: { type: string, enum: [activo, inactivo] }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200': { description: Lista de jugadores }
+        '400': { description: Filtro inválido }
+    post:
+      summary: Crear jugador
+      security: [{ SessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nickname, rol]
+              properties:
+                nickname: { type: string }
+                nombre_real: { type: string }
+                pais: { type: string }
+                rol: { type: string, enum: [Top, Jungle, Mid, ADC, Support] }
+                estado: { type: string, enum: [activo, inactivo], default: activo }
+      responses:
+        '201': { description: Jugador creado }
+        '400': { description: Datos inválidos }
+        '401': { description: Falta token de administrador }
+        '409': { description: Nickname duplicado }
+  /jugadores/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    get:
+      summary: Obtener detalle de jugador
+      responses:
+        '200': { description: Detalle de jugador }
+        '404': { description: Jugador no encontrado }
+    put:
+      summary: Actualizar jugador
+      security: [{ SessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Jugador' }
+      responses:
+        '200': { description: Jugador actualizado }
+        '409': { description: Nickname duplicado }
+    delete:
+      summary: Eliminar jugador
+      security: [{ SessionCookie: [] }]
+      responses:
+        '204': { description: Jugador eliminado }
+        '404': { description: Jugador no encontrado }
+  /rosters:
+    get:
+      summary: Listar rosters
+      parameters:
+        - in: query
+          name: tipo
+          schema: { type: string, enum: [Principal, Academy] }
+        - in: query
+          name: temporada
+          schema: { type: string }
+      responses:
+        '200': { description: Lista de rosters con cantidad de jugadores }
+    post:
+      summary: Crear roster
+      security: [{ SessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nombre, temporada]
+              properties:
+                nombre: { type: string }
+                juego: { type: string, default: League of Legends }
+                tipo: { type: string, enum: [Principal, Academy], default: Principal }
+                temporada: { type: string, example: '2026' }
+      responses:
+        '201': { description: Roster creado }
+        '400': { description: Datos inválidos }
+  /rosters/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    get:
+      summary: Obtener roster con sus jugadores
+      responses:
+        '200': { description: Detalle del roster }
+        '404': { description: Roster no encontrado }
+    put:
+      summary: Actualizar roster
+      security: [{ SessionCookie: [] }]
+      responses:
+        '200': { description: Roster actualizado }
+        '404': { description: Roster no encontrado }
+    delete:
+      summary: Eliminar roster sin eliminar los jugadores
+      security: [{ SessionCookie: [] }]
+      responses:
+        '204': { description: Roster eliminado }
+  /rosters/{id}/jugadores:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+    get:
+      summary: Listar jugadores asignados a un roster
+      responses:
+        '200': { description: Jugadores del roster }
+    post:
+      summary: Asignar jugador a roster
+      security: [{ SessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id_jugador, rol_en_roster]
+              properties:
+                id_jugador: { type: integer }
+                rol_en_roster: { type: string, enum: [Titular, Suplente] }
+      responses:
+        '201': { description: Jugador asignado }
+        '404': { description: Roster o jugador no encontrado }
+        '409': { description: Límite de titulares o rol duplicado }
+  /rosters/{id}/jugadores/{id_jugador}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: integer }
+      - in: path
+        name: id_jugador
+        required: true
+        schema: { type: integer }
+    put:
+      summary: Cambiar rol del jugador dentro del roster
+      security: [{ SessionCookie: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rol_en_roster]
+              properties:
+                rol_en_roster: { type: string, enum: [Titular, Suplente] }
+      responses:
+        '200': { description: Asignación actualizada }
+        '409': { description: Conflicto con las reglas del roster }
+    delete:
+      summary: Quitar jugador del roster
+      security: [{ SessionCookie: [] }]
+      responses:
+        '204': { description: Jugador quitado del roster }
