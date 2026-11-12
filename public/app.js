@@ -26,38 +26,68 @@ const setMessage = (selector, text, good = false) => {
 function showLogin() {
   $('#loginView').classList.remove('hidden');
   $('#adminView').classList.add('hidden');
+  $('#publicView').classList.add('hidden');
   $('#topUser').classList.add('hidden');
   csrfToken = '';
 }
 function showAdmin(user) {
+  $('#publicView').classList.add('hidden');
   $('#loginView').classList.add('hidden');
   $('#adminView').classList.remove('hidden');
   $('#topUser').classList.remove('hidden');
   $('#userEmail').textContent = user.email || 'Administrador';
   loadDashboard().catch(e => setMessage('#globalMessage', e.message));
 }
+function showPublic(user) {
+  $('#loginView').classList.add('hidden');
+  $('#adminView').classList.add('hidden');
+  $('#publicView').classList.remove('hidden');
+  $('#topUser').classList.remove('hidden');
+  $('#userEmail').textContent = user.email || 'Usuario';
+}
 async function checkSession() {
   try {
     const session = await api('/auth/me');
     csrfToken = session.csrfToken;
-    showAdmin(session.user);
+    if (session.user.role === 'Admin') showAdmin(session.user);
+    else showPublic(session.user);
   } catch { showLogin(); }
 }
+
 $('#loginForm').addEventListener('submit', async e => {
-  e.preventDefault(); setMessage('#loginMessage', 'Validando acceso...');
-  const form = new FormData(e.currentTarget);
+  e.preventDefault();
+
+  const loginForm = e.currentTarget;
+  const form = new FormData(loginForm);
+
+  setMessage('#loginMessage', 'Validando acceso...');
+
   try {
-    const data = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email: form.get('email'), password: form.get('password') }) });
+    const data = await api('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: form.get('email'),
+        password: form.get('password')
+      })
+    });
+
     csrfToken = data.csrfToken;
-    e.currentTarget.reset();
+
+    loginForm.reset();
+
     setMessage('#loginMessage', '');
     showAdmin(data.user);
-  } catch (err) { setMessage('#loginMessage', err.message); }
+  } catch (err) {
+    setMessage('#loginMessage', err.message);
+  }
 });
-$('#logoutBtn').addEventListener('click', async () => {
+
+async function logout() {
   try { await api('/auth/logout', { method: 'POST', body: '{}' }); } catch {}
   showLogin();
-});
+}
+$('#logoutBtn').addEventListener('click', logout);
+$('#publicLogoutBtn').addEventListener('click', logout);
 document.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b === btn));
   $('#playersSection').classList.toggle('hidden', btn.dataset.tab !== 'players');

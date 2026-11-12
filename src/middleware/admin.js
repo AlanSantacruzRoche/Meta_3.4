@@ -26,7 +26,6 @@ export function requireAdmin(req, res, next) {
 }
 
 export function verifyCsrf(req, res, next) {
-  // Only mutating methods require a CSRF token.
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
 
   const cookieToken = req.cookies?.csrf_token;
