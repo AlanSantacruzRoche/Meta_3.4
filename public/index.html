@@ -27,8 +27,17 @@
           <label>Contraseña<input name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required></label>
           <button class="btn btn-primary full" type="submit">Entrar al panel <span>↗</span></button>
           <p id="loginMessage" class="message" role="status"></p>
+          <div class="google-login-divider"><span>O continúa con</span></div>
+          <a class="btn btn-google full" href="/api/v1/auth/google/login">Continuar con Google</a>
           <p class="security-note"><span>▣</span> Sesión protegida con JWT, cookies HTTP-Only y CSRF.</p>
         </form>
+      </section>
+
+      <section id="publicView" class="panel hidden public-session">
+        <p class="eyebrow">CUENTA REGISTRADA</p>
+        <h1>Sesión iniciada</h1>
+        <p class="muted">Tu cuenta de Google quedó registrada correctamente. Tu rol actual es <strong>Public</strong>; no tienes permisos para administrar jugadores o rosters.</p>
+        <button id="publicLogoutBtn" class="btn btn-primary">Cerrar sesión</button>
       </section>
 
       <section id="adminView" class="hidden">

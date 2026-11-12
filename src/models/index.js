@@ -1,6 +1,7 @@
 import Jugador from './jugador.model.js';
 import Roster from './roster.model.js';
 import RosterJugador from './rosterJugador.model.js';
+import Usuario from './usuario.model.js';
 
 Roster.belongsToMany(Jugador, {
   through: RosterJugador, as: 'jugadores', foreignKey: 'id_roster', otherKey: 'id_jugador'
@@ -12,4 +13,4 @@ Roster.hasMany(RosterJugador, { foreignKey: 'id_roster', onDelete: 'CASCADE' });
 RosterJugador.belongsTo(Roster, { foreignKey: 'id_roster' });
 RosterJugador.belongsTo(Jugador, { foreignKey: 'id_jugador' });
 
-export { Jugador, Roster, RosterJugador };
+export { Jugador, Roster, RosterJugador, Usuario };

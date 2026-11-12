@@ -30,6 +30,36 @@ components:
         tipo: { type: string, enum: [Principal, Academy] }
         temporada: { type: string, example: '2026' }
 paths:
+  /auth/google/login:
+    get:
+      summary: Iniciar autenticación con Google OAuth 2.0
+      description: Redirige al navegador a Google para autorizar el acceso. La API valida state al regresar.
+      responses:
+        '302': { description: Redirección a Google }
+        '500': { description: Faltan credenciales OAuth en el servidor }
+  /auth/google/callback:
+    get:
+      summary: Callback de Google OAuth
+      description: Intercambia el código, valida el ID token, registra o recupera al usuario y establece cookies JWT y CSRF.
+      parameters:
+        - in: query
+          name: code
+          schema: { type: string }
+        - in: query
+          name: state
+          schema: { type: string }
+      responses:
+        '302': { description: Sesión creada y redirección al frontend }
+        '400': { description: Estado OAuth inválido }
+        '401': { description: Autorización cancelada o token inválido }
+        '409': { description: Correo asociado a otra cuenta }
+  /auth/me:
+    get:
+      summary: Consultar la sesión actual (Admin o Public)
+      security: [{ SessionCookie: [] }]
+      responses:
+        '200': { description: Datos del usuario y token CSRF }
+        '401': { description: Sesión inválida o expirada }
   /health:
     get:
       summary: Verificar estado de API y base de datos
